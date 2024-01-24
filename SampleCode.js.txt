@@ -1,0 +1,418 @@
+
+using serviceinterface.server.AppserverLogic.shared.asutilityclass from propath.
+
+def shared var g-cono       like sasc.cono                  no-undo.
+def shared var g-today      as date format "99/99/99"       no-undo.
+def shared var g-operinit   like sasoo.operinit             no-undo.
+def shared var g-operinits  like sasoo.operinit             no-undo.
+def        var i            as int                          no-undo.
+
+def input param cOption1        as char     no-undo.
+def input param cOption2        as char     no-undo.
+def input param cOption3        as char     no-undo.
+def input param cOption4        as char     no-undo.
+def input param cOption5        as char     no-undo.
+def input param cOption6        as char     no-undo.
+def input param cOption7        as char     no-undo.
+def input param cOption8        as char     no-undo.
+def input param cOption9        as char     no-undo.
+def input param cOption10       as char     no-undo.
+def input param cOption11       as char     no-undo.
+def input param cOption12       as char     no-undo.
+def input param cOption13       as char     no-undo.
+def input param cOption14       as char     no-undo.
+def input param cOption15       as char     no-undo.
+def input param cOption16       as char     no-undo.
+def input param cOption17       as char     no-undo.
+def input param cOption18       as char     no-undo.
+def input param cOption19       as char     no-undo.
+
+def var cErrorMessage   as char             no-undo.
+def var v-subject       as char   format "x(30)"                    no-undo. 
+
+def var nummonths as int init 12 no-undo.
+def var v-ordertaker like sasoo.loginnm no-undo.
+def var v-salesrepname like smsn.name no-undo.
+def var v-vendorcode like apsv.vendno no-undo.
+def var v-vendorname like apsv.name no-undo.
+def var v-transtype as char no-undo.
+def var v-override as log no-undo.
+def var v-qtyship like oeel.qtyship init 0 no-undo.
+def var v-netamt like oeel.netamt no-undo.
+def var v-csunperstk like icss.csunperstk no-undo.
+def var v-prodlinedesc like icsl.descrip no-undo.
+def var v-proddesc as char no-undo.
+def var v-prodcost like oeel.prodcost no-undo. 
+def var v-custname like arsc.name no-undo.
+def var v-custtype like arsc.custtype no-undo.
+def var v-custtypedesc like sasta.descrip no-undo.
+def var v-stockunit like icsp.unitstock no-undo.
+def var v-custclass like arsc.class no-undo.
+def var sendemail as log init no no-undo.
+def var emailaddr as char no-undo.
+def var begindt as date no-undo.
+def var enddt as date no-undo.
+def var v-replcost like icsw.replcost no-undo.
+def var v-glcost like oeel.glcost no-undo.
+def var v-baseprice like icsw.baseprice no-undo.
+def var filepath as char no-undo.
+def var filename as char no-undo.
+def var filename1 as char no-undo.
+def var filename2 as char no-undo.
+def var filename3 as char no-undo.
+def var filename4 as char no-undo.
+def var filename5 as char no-undo.
+def var filename6 as char no-undo.
+def var filename7 as char no-undo.
+def var filename8 as char no-undo.
+def var filename9 as char no-undo.
+def var filename10 as char no-undo.
+def var filename11 as char no-undo.
+
+/*Prodcost Variables*/
+def var v-vendno like icsw.arpvendno no-undo.
+def var v-vendname like apsv.name no-undo.
+def var v-prodline like icsw.prodline no-undo.
+def var v-pricetype like icsw.pricety no-undo.
+def var v-pricetypedesc like sasta.descrip no-undo.
+def var v-prodlinename like icsl.descrip no-undo.
+def var v-avgcost like icsw.avgcost no-undo.
+def var v-lastcost like icsw.avgcost no-undo.
+def var v-listprice like icsw.listprice no-undo.
+def var v-numunits like icseu.unitconv no-undo.
+def var v-prodcat like icsp.prodcat no-undo.
+
+def var v-prctype as char no-undo.
+
+def temp-table tt
+    field custnum like oeeh.custno
+    field custname like arsc.name
+    field custtype like arsc.custtype
+    field custtypedesc like sasta.descrip
+    field annualrev like oeel.netamt.
+    
+ def temp-table tt1
+    field custnum like oeeh.custno
+    field custname like arsc.name
+    field custtype like arsc.custtype
+    field custtypedesc like sasta.descrip
+    field annualrev like oeel.netamt
+    field custclass like arsc.class.
+
+/* CONFIGURATION OF REPORT */
+def var v-data        as char format "x(78)"  no-undo.
+DEF STREAM s-oo.
+
+ASSIGN
+    nummonths   = 1
+    filename    = asutilityclass:GetTenantDir() + "p2_invoice_data.csv"
+    .
+       
+/* FOR EMAIL REPORTS */
+ASSIGN
+    sendemail   = yes
+    emailaddr   = "dev@aswgc.com"
+    v-subject   = "Profit2 Initial Extract-" + ENTRY(3,asutilityclass:GetTenantDir(),"/").
+
+/* DON'T MODIFY BELOW THIS POINT */
+
+/*
+assign begindt = ADD-INTERVAL(DATE(MONTH(TODAY),1,YEAR(TODAY)),(nummonths) * -1,"months")
+       enddt = ADD-INTERVAL(begindt,nummonths,"months") - 1.
+*/
+
+assign
+    begindt = 11/01/22
+    enddt   = 11/30/23.
+    
+output to VALUE(filename).
+export delimiter "," "Invoice Number"
+                     "Invoice Date"
+                     "Customer 'Bill To' Number"
+                     "Customer Name"
+                     "Customer Price Type"
+                     "Branch Code"
+                     "Order Entered By Code"
+                     "Order Taker Name"
+                     "Sales Rep Code"
+                     "Sales Rep Name"
+                     "Product Line Code"
+                     "Product Line Description"
+                     "Supplier Code"
+                     "Supplier Name"
+                     "Transaction Type"
+                     "Item Number"
+                     "Item Description"
+                     "Unit of Measure"
+                     "Std Case Pack"
+                     "Units Sold"
+                     "Unit Cost"
+                     "Base Price"
+                     "Replacement Cost"
+                     "GL Cost"
+                     "Unit Sell"
+                     "Extended Cost"
+                     "Extended Sell Price"
+                     "Override"
+                     "Repair Order Number"
+                     "Repair Order Suffix"
+                     "Product Category"
+                     "Rebate Amount"
+                     "PD Rec #"
+                     .
+
+for each icsd where
+    icsd.cono = g-cono
+    no-lock,
+each oeeh where
+    oeeh.cono      = icsd.cono  and
+    oeeh.whse      = icsd.whse  and
+    oeeh.invoicedt >= begindt   and
+    oeeh.invoicedt <= enddt     and
+    (oeeh.stagecd = 4 or oeeh.stagecd = 5)
+    no-lock,
+each oeel where
+    oeel.cono       = icsd.cono     and
+    oeel.orderno    = oeeh.orderno  and
+    oeel.ordersuf   = oeeh.ordersuf and
+    oeel.specnstype <> "l"          and
+    oeel.statustype <> "c"          and
+    oeel.qtyship    <> 0
+    no-lock:
+
+    
+    find first icss where
+        icss.cono = g-cono and
+        icss.prod = oeel.shipprod and
+        icss.icspecrec = oeel.icspecrec no-lock no-error.
+    
+    if avail icss then do:
+        assign v-csunperstk = icss.csunperstk.                                     end.
+    else do:
+        assign v-csunperstk = 1.
+    end.
+    
+    find first icsp where
+         icsp.cono = oeel.cono and
+         icsp.prod = oeel.shipprod no-lock no-error.
+
+    if avail icsp then do:
+        assign v-proddesc = icsp.descrip[1] + " " + icsp.descrip[2].
+        assign v-stockunit = icsp.unitstock.
+    end.
+    else do:
+        assign v-stockunit = "".
+        find first icenh where
+                   icenh.cono = oeel.cono and
+                   icenh.typecd = 'N' and
+                   icenh.whse = oeel.whse and
+                   icenh.prod = oeel.shipprod no-lock no-error.
+        if avail icenh then do:           
+            assign v-proddesc = icenh.descrip[1] + " " + icenh.descrip[2].  
+        end.
+        else do:
+            assign v-proddesc = "".
+        end.
+    end.
+
+    find first arsc where
+               arsc.cono = icsd.cono and
+               arsc.custno = oeeh.custno no-lock no-error.
+               
+    if avail arsc then do:
+        assign v-custname = arsc.name
+               v-custtype = arsc.pricetype.
+    end.
+    else do:
+        assign v-custname = ""
+               v-custtype = "".
+    end.
+    find first icsl where
+               icsl.cono = oeel.cono and
+               icsl.whse = icsd.whse and
+               icsl.vendno = oeel.vendno and
+               icsl.prodline = oeel.prodline no-lock no-error.
+               
+    if avail icsl then do:
+        assign v-prodlinedesc = icsl.descrip.
+    end.
+    else do:
+        assign v-prodlinedesc = "".
+    end.
+    assign v-qtyship = oeel.stkqtyship.
+    assign v-netamt = oeel.netamt - oeel.wodiscamt.
+    
+    if oeel.returnfl = yes then do:
+         assign v-qtyship = v-qtyship * -1
+                v-netamt = v-netamt * -1.
+    end.
+
+    assign v-override = no
+           v-transtype = ""
+           v-vendorname = ""
+           v-vendorcode = 0
+           v-salesrepname = ""
+           v-ordertaker = "".
+           
+    if oeel.discoverfl = yes then do:
+        assign v-override = yes.
+    end.
+    else if oeel.costoverfl = yes then do:
+        assign v-override = yes.
+    end.
+    else if oeel.priceoverfl = yes then do:
+        assign v-override = yes.
+    end.
+
+    if oeel.specnstype = "N" then do:
+         assign v-transtype = "NonStock".
+    end.
+    else if oeel.specnstype = "" then do:
+         assign v-transtype = "Stock".
+    end.
+    else if oeel.specnstype = "S" then do:
+         assign v-transtype = "Special".
+    end.
+    if oeel.transtype = "DO" then do:
+         assign v-transtype = "Direct Ship".
+    end.
+
+    find first apsv where
+               apsv.cono = oeel.cono and
+               apsv.vendno = oeel.vendno no-lock no-error.
+               
+    if avail apsv then do:
+        assign v-vendorcode = oeel.vendno
+               v-vendorname = apsv.name.
+    end.
+    else do:
+        assign v-vendorcode = oeel.vendno
+               v-vendorname = "".
+    end.
+    
+    find first pv_user use-index k-pv_user where
+               pv_user.cono = oeel.cono and
+               pv_user.oper2 = oeeh.takenby no-lock no-error.
+    
+    if avail pv_user then do:
+        assign v-ordertaker = pv_user._user-name.              
+    end.
+    else do:
+        assign v-ordertaker = "".
+    end.
+
+    find first smsn where
+               smsn.cono = oeel.cono and
+               smsn.slsrep = oeeh.slsrepout no-lock no-error.
+               
+    if avail smsn then do:
+        assign v-salesrepname = smsn.name.
+    end.
+    else do:
+        assign v-salesrepname = "".
+    end.
+                      
+    find first icsw where
+             icsw.cono = g-cono and
+             icsw.whse = oeel.whse and
+             icsw.prod = oeel.shipprod no-lock no-error.
+             
+    if avail icsw then do:
+        assign v-baseprice = icsw.baseprice
+               v-replcost  = icsw.replcost.
+    end.
+    else do:
+        assign v-baseprice = 0
+               v-replcost  = 0.
+    end.
+
+    assign v-glcost = oeel.glcost.
+
+    if v-csunperstk  =  1 then do:
+        assign v-prodcost = oeel.prodcost / oeel.unitconv
+               v-baseprice = v-baseprice / oeel.unitconv
+               v-replcost = v-replcost / oeel.unitconv.
+    end.
+    else do:
+        assign v-prodcost = oeel.prodcost * v-csunperstk
+               v-baseprice = v-baseprice * v-csunperstk
+               v-replcost = v-replcost * v-csunperstk.
+    end.
+
+    def var v-rebateamt like oeel.prodcost.
+    assign  v-rebateamt = 0.00.
+
+    for each pder where
+             pder.cono = oeel.cono and
+             pder.orderno = oeel.orderno and
+             pder.ordersuf = oeel.ordersuf and
+             pder.lineno = oeel.lineno no-lock:
+
+        assign v-rebateamt = v-rebateamt + pder.rebateamt.
+
+    end.
+
+    export delimiter "," STRING(oeeh.orderno) + "-" + STRING(oeeh.ordersuf,"99") label "Invoice Number" format "x(11)"
+           STRING(oeeh.invoicedt,"99/99/9999") label "Invoice Date"
+           oeeh.custno
+           v-custname
+           v-custtype
+           oeeh.whse
+           oeeh.takenby
+           v-ordertaker
+           oeeh.slsrepout
+           v-salesrepname
+           oeel.prodline
+           v-prodlinedesc
+           v-vendorcode
+           v-vendorname
+           v-transtype
+           oeel.shipprod
+           v-proddesc label "Line Description"
+           v-stockunit
+           oeel.unitconv
+           v-qtyship label "Units Sold"
+           v-prodcost label "Unit Cost"
+           v-baseprice
+           v-replcost
+           v-glcost
+           (v-netamt / v-qtyship) label "Unit Sell Price"
+           (v-qtyship * (v-prodcost - v-rebateamt)) label "Extended Cost"
+           v-netamt label "Extended Sell Price"
+           v-override
+           oeeh.repairordno
+           oeeh.repairordsuf
+           oeel.prodcat
+           v-rebateamt
+           oeel.pdrecno
+           .
+
+end.
+
+output close.
+
+FILE-INFO:FILE-NAME = filename.
+DISP FILE-INFO:FILE-SIZE.
+
+if sendemail = yes then do:
+    os-delete value(filename + ".zip":U).
+    /*os-delete value(filename2 + ".zip":U).*/
+    
+    input stream s-oo through value("zip -r " + filename + ".zip " + filename).
+	repeat:
+		import stream s-oo delimiter "|" v-data.
+		disp v-data with width 100.
+	end.
+	input stream s-oo close.
+
+    run serviceinterface/server/AppserverLogic/shared/mmexportsendfile.p
+        (input 1,
+         input g-operinit,
+         input filename + ".zip",
+         input filename + ".zip",
+         input "e":U,
+         input emailaddr,
+         input v-subject,
+         output cErrorMessage).
+
+end.
