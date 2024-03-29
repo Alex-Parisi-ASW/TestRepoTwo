@@ -10,13 +10,13 @@ def        var i            as int                          no-undo.
 def input param cOption1        as char     no-undo.
 def input param cOption2        as char     no-undo.
 
-def  input param cOption3        as char     no-undo.
+def input param cOption3        as char     no-undo.
 def input param cOption4        as char     no-undo.
 def input param cOption5        as char     no-undo.
 def input param cOption6        as char     no-undo.
 def input param cOption7        as char     no-undo.
 def input param cOption8        as char     no-undo.
-def  input param cOption9        as char     no-undo.
+def input param cOption9        as char     no-undo.
 def input param cOption10       as char     no-undo.
 def input param cOption11       as char     no-undo.
 def input param cOption12       as char     no-undo.
